@@ -8,13 +8,14 @@ from collections import deque
 from icalendar import Calendar, Event
 from datetime import datetime, timedelta
 import os
+import time
 
 options = Options()
 options.binary_location = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
 driver_path = 'chromedriver'
 driver = webdriver.Chrome(options=options, executable_path=driver_path)
-TIMEZONE_SHIFT = 6
-HTML_FILE_LOCATION = "http://localhost:5500"
+TIMEZONE_SHIFT = 5
+HTML_FILE_LOCATION = "http://127.0.0.1:5500/"
 
 
 def shift(key, array):
@@ -27,12 +28,16 @@ def substring(string, start, end):
     return string[start:end]
 
 
+if os.path.exists("export.ics"):
+    os.remove("export.ics")
+
 driver.get(HTML_FILE_LOCATION)
 
+# time.sleep(5)
 try:
     # locate the table
     search_results = WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.ID, "selectable")))
+        EC.presence_of_element_located((By.ID, "cell167")))
 
     selected_week = driver.find_element_by_id("divSelectedWeek")
     week_string = selected_week.find_element_by_xpath('a').text
@@ -43,15 +48,23 @@ try:
     curDay = int(week_string[1])
     curYear = int(week_string[2])
 
+    test = driver.find_element_by_id("cell105")
+
+    print(test)
+
     # scrape table cells
     cells = search_results.find_elements_by_xpath(
         "//*[contains(@id, 'cell') and not(contains(@id, 'cellHours')) and not(contains(@id, 'cellDays')) ]")
+
+    for cell in cells:
+        print(cell.get_attribute('id') + " " + cell.get_attribute('innerHTML'))
+
     time_slots = [[0 for columns in range(7)] for rows in range(24)]
 
     hour = 0
     day = 0
     for cell in cells:
-        time_slots[day][hour] = cell.text
+        time_slots[day][hour] = cell.get_attribute('innerHTML')
         hour += 1
 
         if hour == 7:
