@@ -14,7 +14,7 @@ options = Options()
 options.binary_location = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
 driver_path = 'chromedriver'
 driver = webdriver.Chrome(options=options, executable_path=driver_path)
-TIMEZONE_SHIFT = 5
+TIMEZONE_SHIFT = 6
 HTML_FILE_LOCATION = "http://127.0.0.1:5500/"
 
 
@@ -103,3 +103,4 @@ try:
 finally:
     print("finished")
     driver.quit()
+    os.system('open export.ics')
