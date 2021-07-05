@@ -1,4 +1,5 @@
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,11 +12,15 @@ import os
 import time
 
 options = Options()
+options.add_argument("--headless")
 options.binary_location = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser'
-driver_path = 'chromedriver'
-driver = webdriver.Chrome(options=options, executable_path=driver_path)
+androidSync = True
+androidSyncUrl = 'https://www.tacit.dk/app/foldersync/trigger/841e7d3767bb4f55a0ea813888b596de/folderpair/2/action/sync-start'
+driver = webdriver.Chrome(ChromeDriverManager(
+    version="91.0.4472.101").install(), options=options)
 TIMEZONE_SHIFT = 6
-HTML_FILE_LOCATION = "http://127.0.0.1:5500/"
+HTML_FILE_LOCATION = os.getcwd() + "//" + "index.html"
+#HTML_FILE_LOCATION = "https://prv.tutor.com/nGEN/Tools/ScheduleManager_v2/setContactID.aspx?ProgramGUID=B611858B-4D02-4AFE-8053-D082BBC1C58E&UserGUID=71bc90e8-7d5e-49fb-b0b4-6b7e871d8777"
 
 
 def shift(key, array):
@@ -31,9 +36,9 @@ def substring(string, start, end):
 if os.path.exists("export.ics"):
     os.remove("export.ics")
 
-driver.get(HTML_FILE_LOCATION)
+driver.get("file:///" + HTML_FILE_LOCATION)
 
-# time.sleep(5)
+time.sleep(4)
 try:
     # locate the table
     search_results = WebDriverWait(driver, 20).until(
@@ -101,6 +106,10 @@ try:
     f.write(cal.to_ical())
     f.close()
 finally:
+    os.system("browser-sync stop")
     print("finished")
     driver.quit()
+    if androidSync:
+        os.system("cp export.ics '/Users/eli/Library/Group Containers/G69SCX94XU.duck/Library/Application Support/duck/Volumes/Google/My Drive/ical'")
+        os.system('curl ' + androidSyncUrl)
     os.system('open export.ics')
